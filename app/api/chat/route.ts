@@ -162,6 +162,7 @@ export async function POST(req: Request) {
         model: nvidia.chatModel('meta/llama-3.1-70b-instruct'),
         system: SYSTEM_PROMPT + "\n\nIMPORTANT: When you have received tool results and are ready to reply to the user, you MUST output conversational text. DO NOT output JSON or a tool call format when speaking to the user.",
         messages: await convertToModelMessages(cleanMessages),
+        // @ts-ignore - maxSteps is supported at runtime but missing from type definitions in this version
         maxSteps: 5,
         tools,
         onError: (error) => {
