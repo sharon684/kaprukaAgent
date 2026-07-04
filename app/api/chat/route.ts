@@ -99,7 +99,7 @@ export async function POST(req: Request) {
 
       // Stream LLM response with tool calling
       const result = streamText({
-        model: openrouter('google/gemini-2.0-flash-001'),
+        model: openrouter('google/gemini-2.0-flash-exp:free'),
         system: SYSTEM_PROMPT,
         messages: await convertToModelMessages(cleanMessages),
         tools,
