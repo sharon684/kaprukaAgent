@@ -36,21 +36,36 @@ function isRateLimited(ip: string): boolean {
 }
 
 // Input sanitization
-function sanitizeMessages(messages: UIMessage[]): UIMessage[] {
-  return messages.map((msg) => ({
-    ...msg,
-    parts: msg.parts.map((part) => {
-      if (part.type === 'text') {
-        // Strip potential injection patterns from text
-        const sanitized = part.text
-          .slice(0, 4000) // Cap individual message length
-          .replace(/<script[^>]*>.*?<\/script>/gi, '') // Remove script tags
-          .replace(/javascript:/gi, ''); // Remove javascript: URLs
-        return { ...part, text: sanitized };
-      }
-      return part;
-    }),
-  }));
+function sanitizeMessages(messages: any[]): any[] {
+  return messages.map((msg) => {
+    // Handle parts-based messages (Vercel AI SDK v7 rich messages)
+    if (msg.parts && Array.isArray(msg.parts)) {
+      return {
+        ...msg,
+        parts: msg.parts.map((part: any) => {
+          if (part.type === 'text') {
+            const sanitized = part.text
+              .slice(0, 4000)
+              .replace(/<script[^>]*>.*?<\/script>/gi, '')
+              .replace(/javascript:/gi, '');
+            return { ...part, text: sanitized };
+          }
+          return part;
+        }),
+      };
+    }
+    
+    // Handle legacy/standard string content messages
+    if (typeof msg.content === 'string') {
+      const sanitized = msg.content
+        .slice(0, 4000)
+        .replace(/<script[^>]*>.*?<\/script>/gi, '')
+        .replace(/javascript:/gi, '');
+      return { ...msg, content: sanitized };
+    }
+
+    return msg;
+  });
 }
 
 export async function POST(req: Request) {
@@ -99,7 +114,7 @@ export async function POST(req: Request) {
 
       // Stream LLM response with tool calling
       const result = streamText({
-        model: openrouter('google/gemini-flash-1.5'),
+        model: openrouter('google/gemini-3.5-flash'),
         system: SYSTEM_PROMPT,
         messages: await convertToModelMessages(cleanMessages),
         tools,
