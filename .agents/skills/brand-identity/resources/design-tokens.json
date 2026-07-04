@@ -1,0 +1,94 @@
+{
+  "meta": {
+    "brand_name": "Kapruka",
+    "description": "Core design tokens for the Kapruka AI Shopping Agent UI. Derived from kapruka.com's live brand identity.",
+    "color_scheme": "light"
+  },
+  "colors": {
+    "primary": {
+      "DEFAULT": "#0D6EFD",
+      "hover": "#0B5ED7",
+      "foreground": "#FFFFFF"
+    },
+    "accent": {
+      "DEFAULT": "#402970",
+      "hover": "#2D1D50",
+      "foreground": "#FFFFFF"
+    },
+    "background": "#FFFFFF",
+    "foreground": "#111111",
+    "text": {
+      "primary": "#111111",
+      "secondary": "#5f5f5f",
+      "muted": "#999999"
+    },
+    "link": "#402970",
+    "muted": "#F7F5FA",
+    "destructive": "#EF4444",
+    "success": "#1A8A3D",
+    "border": "#E3E1EA"
+  },
+  "typography": {
+    "font_family_primary": "Roboto",
+    "font_family_headings": ["Roboto", "sans-serif"],
+    "font_family_body": ["Roboto", "sans-serif"],
+    "font_family_paragraph": ["Roboto", "sans-serif"],
+    "font_weight_bold": "700",
+    "font_weight_semibold": "600",
+    "font_weight_normal": "400",
+    "font_sizes": {
+      "h1": "22px",
+      "h2": "12px",
+      "body": "15px"
+    }
+  },
+  "ui": {
+    "border_radius_default": "5px",
+    "border_radius_small": "5px",
+    "border_radius_pill": "50px",
+    "spacing_base_unit": "4px",
+    "shadow": "none"
+  },
+  "components": {
+    "input": {
+      "background": "#FFFFFF",
+      "text_color": "#000000",
+      "border_color": "#E3E1EA",
+      "border_radius": "5px",
+      "border_radius_corners": {
+        "top_left": "5px",
+        "top_right": "5px",
+        "bottom_right": "5px",
+        "bottom_left": "5px"
+      },
+      "shadow": "none"
+    },
+    "button_primary": {
+      "background": "#402970",
+      "text_color": "#FFFFFF",
+      "border_radius": "50px",
+      "border_radius_corners": {
+        "top_left": "50px",
+        "top_right": "50px",
+        "bottom_right": "50px",
+        "bottom_left": "50px"
+      },
+      "shadow": "none",
+      "hover_background": "#2D1D50"
+    },
+    "button_secondary": {
+      "background": "transparent",
+      "text_color": "#402970",
+      "border": "1px solid #402970",
+      "border_radius": "50px",
+      "shadow": "none"
+    }
+  },
+  "images": {
+    "logo": "https://www.kapruka.com/static/image/send-online-logo.png?v5",
+    "favicon": "https://www.kapruka.com/static/icons/favicon.ico",
+    "og_image": null,
+    "logo_href": "https://www.kapruka.com",
+    "logo_alt": "Kapruka"
+  }
+}
