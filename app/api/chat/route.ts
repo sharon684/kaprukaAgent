@@ -5,9 +5,15 @@ import {
   toUIMessageStream,
   UIMessage,
 } from 'ai';
-import { google } from '@ai-sdk/google';
+import { createOpenAI } from '@ai-sdk/openai';
 import { createMCPClient } from '@ai-sdk/mcp';
 import { SYSTEM_PROMPT } from '@/lib/system-prompt';
+
+// Configure OpenRouter as the AI provider
+const openrouter = createOpenAI({
+  baseURL: 'https://openrouter.ai/api/v1',
+  apiKey: process.env.OPENROUTER_API_KEY,
+});
 
 export const maxDuration = 60;
 
@@ -93,7 +99,7 @@ export async function POST(req: Request) {
 
       // Stream LLM response with tool calling
       const result = streamText({
-        model: google('gemini-2.0-flash'),
+        model: openrouter('google/gemini-2.0-flash-001'),
         system: SYSTEM_PROMPT,
         messages: await convertToModelMessages(cleanMessages),
         tools,
