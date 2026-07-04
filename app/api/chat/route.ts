@@ -5,14 +5,17 @@ import {
   toUIMessageStream,
   UIMessage,
 } from 'ai';
-import { createOpenAI } from '@ai-sdk/openai';
+import { createOpenAICompatible } from '@ai-sdk/openai-compatible';
 import { createMCPClient } from '@ai-sdk/mcp';
 import { SYSTEM_PROMPT } from '@/lib/system-prompt';
 
-// Configure NVIDIA API as the AI provider (using OpenAI compatibility)
-const nvidia = createOpenAI({
+// Configure NVIDIA API as the AI provider using the compatible SDK
+const nvidia = createOpenAICompatible({
+  name: 'nim',
   baseURL: 'https://integrate.api.nvidia.com/v1',
-  apiKey: process.env.NVIDIA_API_KEY,
+  headers: {
+    Authorization: `Bearer ${process.env.NVIDIA_API_KEY}`,
+  },
 });
 
 export const maxDuration = 60;
@@ -110,13 +113,56 @@ export async function POST(req: Request) {
 
     try {
       // Auto-discover tools from Kapruka's MCP server
-      const tools = await mcpClient.tools();
+      const rawTools = await mcpClient.tools();
+      
+      // Intercept tool executions to fix LLM schema hallucination where it flattens arguments
+      const tools = Object.fromEntries(
+        Object.entries(rawTools).map(([name, tool]) => [
+          name,
+          {
+            ...tool,
+            execute: async (args: any, options: any) => {
+              // Intercept and sanitize arguments to prevent Pydantic extra_forbidden errors
+              let finalArgs = args;
+              
+              if (!args.params) {
+                const fixedArgs: Record<string, any> = {};
+                const source = args;
+                
+                if (name === 'kapruka_search_products') {
+                  fixedArgs.q = source.q || source.query || source.search;
+                  if (source.cursor) fixedArgs.cursor = source.cursor;
+                } else if (name === 'kapruka_get_product') {
+                  fixedArgs.product_id = source.product_id || source.id;
+                } else if (name === 'kapruka_list_delivery_cities') {
+                  if (source.q || source.query) fixedArgs.q = source.q || source.query;
+                } else if (name === 'kapruka_check_delivery') {
+                  fixedArgs.city = source.city;
+                  fixedArgs.product_id = source.product_id || source.id;
+                } else {
+                  // Fallback: just copy everything
+                  Object.assign(fixedArgs, source);
+                }
+                
+                finalArgs = { params: fixedArgs };
+              } else {
+                // If LLM somehow output { params: { ... } }, still clean it for search and get
+                const p = args.params;
+                if (name === 'kapruka_search_products' && p.response_format) delete p.response_format;
+              }
+              
+              return tool.execute(finalArgs, options);
+            }
+          }
+        ])
+      );
 
       // Stream LLM response with tool calling
       const result = streamText({
-        model: nvidia('z-ai/glm-5.2'),
-        system: SYSTEM_PROMPT,
+        model: nvidia.chatModel('meta/llama-3.1-70b-instruct'),
+        system: SYSTEM_PROMPT + "\n\nIMPORTANT: When you have received tool results and are ready to reply to the user, you MUST output conversational text. DO NOT output JSON or a tool call format when speaking to the user.",
         messages: await convertToModelMessages(cleanMessages),
+        maxSteps: 5,
         tools,
         onError: (error) => {
           console.error('Stream error:', error);
