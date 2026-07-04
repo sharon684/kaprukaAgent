@@ -11,7 +11,7 @@ const transport = new DefaultChatTransport({
 });
 
 export default function ChatPage() {
-  const { messages, sendMessage, status } = useChat({
+  const { messages, sendMessage, status, error, regenerate } = useChat({
     transport,
     sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls,
   });
@@ -44,6 +44,15 @@ export default function ChatPage() {
           <img src="https://www.kapruka.com/static/image/send-online-logo.png?v5" alt="Kapruka" height="30" />
           <span className="agent-title">AI Agent</span>
         </div>
+        {messages.length > 0 && (
+          <button
+            className="new-chat-btn"
+            onClick={() => window.location.reload()}
+            title="New Chat"
+          >
+            + New Chat
+          </button>
+        )}
       </header>
 
       <main className="chat-main">
@@ -54,6 +63,17 @@ export default function ChatPage() {
             {messages.map((m) => (
               <ChatMessage key={m.id} message={m} />
             ))}
+
+            {/* Error display with retry */}
+            {error && (
+              <div className="error-banner">
+                <span>⚠️ {error.message || 'Something went wrong.'}</span>
+                <button className="retry-btn" onClick={() => regenerate()}>
+                  🔄 Retry
+                </button>
+              </div>
+            )}
+
             {(status === 'submitted' || status === 'streaming') && (
               <div className="loading-indicator">
                 <span className="dot"></span>
