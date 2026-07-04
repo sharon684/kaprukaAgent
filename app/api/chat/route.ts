@@ -9,10 +9,10 @@ import { createOpenAI } from '@ai-sdk/openai';
 import { createMCPClient } from '@ai-sdk/mcp';
 import { SYSTEM_PROMPT } from '@/lib/system-prompt';
 
-// Configure OpenRouter as the AI provider
-const openrouter = createOpenAI({
-  baseURL: 'https://openrouter.ai/api/v1',
-  apiKey: process.env.OPENROUTER_API_KEY,
+// Configure NVIDIA API as the AI provider (using OpenAI compatibility)
+const nvidia = createOpenAI({
+  baseURL: 'https://integrate.api.nvidia.com/v1',
+  apiKey: process.env.NVIDIA_API_KEY,
 });
 
 export const maxDuration = 60;
@@ -114,7 +114,7 @@ export async function POST(req: Request) {
 
       // Stream LLM response with tool calling
       const result = streamText({
-        model: openrouter('google/gemini-3.5-flash'),
+        model: nvidia('z-ai/glm-5.2'),
         system: SYSTEM_PROMPT,
         messages: await convertToModelMessages(cleanMessages),
         tools,
